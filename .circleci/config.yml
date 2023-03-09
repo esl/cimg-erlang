@@ -1,0 +1,69 @@
+version: 2.1
+
+parameters:
+  otp-version:
+    type: string
+    default: "25.2.3"
+
+commands:
+  update_docker:
+    steps:
+      - run:
+          name: Update docker
+          command: |
+            sudo apt-get update
+            sudo apt-get --only-upgrade install docker-ce docker-ce-cli containerd.io
+  compile:
+    steps:
+      - checkout
+      - run: OTP_VERSION=<<pipeline.parameters.otp-version>> ./compile.sh
+      - persist_to_workspace:
+          root: ~/project/
+          paths: ["builds"]
+
+jobs:
+  compile-amd64:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: medium
+    steps:
+      - update_docker
+      - compile
+  compile-arm64:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: arm.medium
+    steps:
+      - update_docker
+      - compile
+  build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: medium
+    steps:
+      - update_docker
+      - checkout
+      - attach_workspace:
+          at: "~/project"
+      - run:
+          name: Setup buildx
+          command: |
+            docker run --privileged --rm tonistiigi/binfmt --install all
+            docker buildx create --name builder --driver docker-container --bootstrap --use
+      - run:
+          name: Docker login
+          command: docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
+      - run:
+          name: Build multi-platform docker image
+          command: OTP_VERSION=<<pipeline.parameters.otp-version>> ./circleci-build.sh
+
+workflows:
+  main:
+    jobs:
+      - compile-amd64
+      - compile-arm64
+      - build:
+          context: mongooseim-org
+          requires:
+            - compile-amd64
+            - compile-arm64
