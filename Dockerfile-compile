@@ -1,0 +1,21 @@
+FROM cimg/base:current
+
+ARG OTP_VERSION
+ARG TARGETARCH
+
+RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    libncurses5-dev \
+    unixodbc-dev
+
+RUN ERLANG_DOWNLOAD_URL="https://github.com/erlang/otp/releases/download/OTP-$OTP_VERSION/otp_src_$OTP_VERSION.tar.gz" && \
+    cd && \
+    mkdir erlang-src && \
+    cd erlang-src && \
+    curl -fSL -o erlang.tar.gz $ERLANG_DOWNLOAD_URL && \
+    tar -xz --strip-components=1 -f erlang.tar.gz && \
+    ./configure && \
+    make
+
+RUN cd && \
+    mkdir builds && \
+    tar -czf builds/erlang-$TARGETARCH.tar.gz erlang-src
