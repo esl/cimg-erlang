@@ -1,9 +1,12 @@
 version: 2.1
 
 parameters:
+  base-version:
+    type: string
+    default: "2023.03"
   otp-version:
     type: string
-    default: "25.2.3"
+    default: "25.3"
 
 commands:
   update_docker:
@@ -16,7 +19,11 @@ commands:
   compile:
     steps:
       - checkout
-      - run: OTP_VERSION=<<pipeline.parameters.otp-version>> ./compile.sh
+      - run:
+          name: Compile Erlang/OTP
+          command: |
+            BASE_VERSION=<<pipeline.parameters.base-version>> \
+            OTP_VERSION=<<pipeline.parameters.otp-version>> ./compile.sh
       - persist_to_workspace:
           root: ~/project/
           paths: ["builds"]
@@ -55,7 +62,9 @@ jobs:
           command: docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
       - run:
           name: Build multi-platform docker image
-          command: OTP_VERSION=<<pipeline.parameters.otp-version>> ./circleci-build.sh
+          command: |
+            BASE_VERSION=<<pipeline.parameters.base-version>> \
+            OTP_VERSION=<<pipeline.parameters.otp-version>> ./circleci-build.sh
 
 workflows:
   main:
