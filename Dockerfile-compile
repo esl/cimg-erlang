@@ -1,4 +1,5 @@
-FROM cimg/base:current
+ARG BASE_VERSION=current
+FROM cimg/base:$BASE_VERSION
 
 ARG OTP_VERSION
 ARG TARGETARCH

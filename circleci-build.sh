@@ -7,5 +7,6 @@ if [ $CIRCLE_BRANCH == "master" ]; then
 fi
 
 docker buildx build --platform linux/amd64,linux/arm64 \
-  --build-arg OTP_VERSION -t mongooseim/cimg-erlang:$OTP_VERSION \
-  --progress=plain -f Dockerfile $PUSH .
+    --build-arg BASE_VERSION --build-arg OTP_VERSION \
+    -t mongooseim/cimg-erlang:$OTP_VERSION \
+    --progress=plain -f Dockerfile $PUSH .
