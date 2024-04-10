@@ -3,10 +3,10 @@ version: 2.1
 parameters:
   base-version:
     type: string
-    default: "2023.09"
+    default: "2024.02"
   otp-version:
     type: string
-    default: "26.1"
+    default: "26.2.3"
 
 commands:
   update_docker:
