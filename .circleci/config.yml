@@ -6,7 +6,7 @@ parameters:
     default: "2024.02"
   otp-version:
     type: string
-    default: "26.2.3"
+    default: "27.0"
 
 commands:
   update_docker:
