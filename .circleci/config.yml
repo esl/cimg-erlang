@@ -3,7 +3,8 @@ version: 2.1
 parameters:
   base-version:
     type: string
-    default: "2024.02"
+    # Check https://hub.docker.com/r/cimg/base for tag options
+    default: "current"
   otp-version:
     type: string
     default: "27.0"
