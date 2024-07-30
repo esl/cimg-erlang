@@ -13,6 +13,8 @@ $ ./build.sh 25.2.3
 
 # Trigger build using "Trigger pipeline" on CircleCI
 
+Go to the CircleCI project page, select branch: [CircleCI](https://app.circleci.com/pipelines/github/esl/cimg-erlang?branch=master).
+
 Press the button:
 
 ![Tigger pipeline button](trigger-pipeline.png "Trigger pipeline")
