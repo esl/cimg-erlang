@@ -1,14 +1,5 @@
 version: 2.1
 
-parameters:
-  base-version:
-    type: string
-    # Check https://hub.docker.com/r/cimg/base for tag options
-    default: "current"
-  otp-version:
-    type: string
-    default: "27.0"
-
 commands:
   update_docker:
     steps:
@@ -18,33 +9,65 @@ commands:
             sudo apt-get update
             sudo apt-get --only-upgrade install docker-ce docker-ce-cli containerd.io
   compile:
+    parameters:
+      base-image:
+        type: string
+        default: "cimg/base:current"
+      otp-version:
+        type: string
+        default: "27.1.2"
     steps:
       - checkout
       - run:
           name: Compile Erlang/OTP
           command: |
-            BASE_VERSION=<<pipeline.parameters.base-version>> \
-            OTP_VERSION=<<pipeline.parameters.otp-version>> ./compile.sh
+            BASE_IMAGE=<<parameters.base-image>> \
+            OTP_VERSION=<<parameters.otp-version>> ./compile.sh
       - persist_to_workspace:
           root: ~/project/
           paths: ["builds"]
 
 jobs:
   compile-amd64:
+    parameters:
+      base-image:
+        type: string
+        default: "cimg/base:current"
+      otp-version:
+        type: string
+        default: "27.1.2"
     machine:
       image: ubuntu-2204:current
     resource_class: medium
     steps:
       - update_docker
-      - compile
+      - compile:
+          base-image: <<parameters.base-image>>
+          otp-version: <<parameters.otp-version>>
   compile-arm64:
+    parameters:
+      base-image:
+        type: string
+        default: "cimg/base:current"
+      otp-version:
+        type: string
+        default: "27.1.2"
     machine:
       image: ubuntu-2204:current
     resource_class: arm.medium
     steps:
       - update_docker
-      - compile
+      - compile:
+          base-image: <<parameters.base-image>>
+          otp-version: <<parameters.otp-version>>
   build:
+    parameters:
+      base-image:
+        type: string
+        default: "cimg/base:current"
+      otp-version:
+        type: string
+        default: "27.1.2"
     machine:
       image: ubuntu-2204:current
     resource_class: medium
@@ -64,8 +87,8 @@ jobs:
       - run:
           name: Build multi-platform docker image
           command: |
-            BASE_VERSION=<<pipeline.parameters.base-version>> \
-            OTP_VERSION=<<pipeline.parameters.otp-version>> ./circleci-build.sh
+            BASE_IMAGE=<<parameters.base-image>> \
+            OTP_VERSION=<<parameters.otp-version>> ./circleci-build.sh
 
 workflows:
   main:
