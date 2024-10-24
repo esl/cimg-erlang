@@ -82,7 +82,7 @@ jobs:
             OTP_VERSION=<<parameters.otp-version>> ./circleci-build.sh
 
 workflows:
-  main:
+  cimg:
     jobs:
       - compile:
           name: compile-amd64
@@ -90,6 +90,21 @@ workflows:
           name: compile-arm64
           resource-class: "arm.medium"
       - build:
+          context: mongooseim-org
+          requires:
+            - compile-amd64
+            - compile-arm64
+  ubuntu-jammy:
+    jobs:
+      - compile:
+          name: compile-amd64
+          base-image: "ubuntu:jammy"
+      - compile:
+          name: compile-arm64
+          base-image: "ubuntu:jammy"
+          resource-class: "arm.medium"
+      - build:
+          base-image: "ubuntu:jammy"
           context: mongooseim-org
           requires:
             - compile-amd64
