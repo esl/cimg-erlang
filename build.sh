@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-export OTP_VERSION=${1:-25.3}
+export BASE_IMAGE=${BASE_IMAGE:-cimg/base:current}
+BASE_IMAGE_NAME=${BASE_IMAGE%:*}
+BASE_IMAGE_VERSION=${BASE_IMAGE#*:}
 
-./compile.sh
-docker build --build-arg BASE_VERSION --build-arg OTP_VERSION \
-  -t cimg-erlang:$OTP_VERSION .
+PROGRESS=auto ./compile.sh
+
+if [ "${BASE_IMAGE%:*}" = "cimg/base" ]; then
+    USER=circleci # CircleCI convenience images require a special user
+    IMAGE_TAG=${OTP_VERSION}
+else
+    USER=root
+    IMAGE_TAG=${BASE_IMAGE_NAME}-${BASE_IMAGE_VERSION}-${OTP_VERSION}
+fi
+
+docker build --build-arg BASE_IMAGE --build-arg OTP_VERSION --build-arg USER \
+    -t cimg-erlang:$IMAGE_TAG .
