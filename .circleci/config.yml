@@ -8,24 +8,6 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get --only-upgrade install docker-ce docker-ce-cli containerd.io
-  compile:
-    parameters:
-      base-image:
-        type: string
-        default: "cimg/base:current"
-      otp-version:
-        type: string
-        default: "27.1.2"
-    steps:
-      - checkout
-      - run:
-          name: Compile Erlang/OTP
-          command: |
-            BASE_IMAGE=<<parameters.base-image>> \
-            OTP_VERSION=<<parameters.otp-version>> ./compile.sh
-      - persist_to_workspace:
-          root: ~/project/
-          paths: ["builds"]
 
 jobs:
   compile-amd64:
@@ -44,8 +26,11 @@ jobs:
       - compile:
           base-image: <<parameters.base-image>>
           otp-version: <<parameters.otp-version>>
-  compile-arm64:
+  compile:
     parameters:
+      resource-class:
+        type: string
+        default: "medium"
       base-image:
         type: string
         default: "cimg/base:current"
@@ -54,12 +39,18 @@ jobs:
         default: "27.1.2"
     machine:
       image: ubuntu-2204:current
-    resource_class: arm.medium
+    resource_class: <<parameters.resource-class>>
     steps:
       - update_docker
-      - compile:
-          base-image: <<parameters.base-image>>
-          otp-version: <<parameters.otp-version>>
+      - checkout
+      - run:
+          name: Compile Erlang/OTP
+          command: |
+            BASE_IMAGE=<<parameters.base-image>> \
+            OTP_VERSION=<<parameters.otp-version>> ./compile.sh
+      - persist_to_workspace:
+          root: ~/project/
+          paths: ["builds"]
   build:
     parameters:
       base-image:
@@ -93,8 +84,11 @@ jobs:
 workflows:
   main:
     jobs:
-      - compile-amd64
-      - compile-arm64
+      - compile:
+          name: compile-amd64
+      - compile:
+          name: compile-arm64
+          resource-class: "arm.medium"
       - build:
           context: mongooseim-org
           requires:
