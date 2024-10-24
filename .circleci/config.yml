@@ -94,6 +94,21 @@ workflows:
           requires:
             - compile-amd64
             - compile-arm64
+  cimg-26:
+    jobs:
+      - compile:
+          name: compile-amd64
+          otp-version: 26.2.5.4
+      - compile:
+          name: compile-arm64
+          otp-version: 26.2.5.4
+          resource-class: "arm.medium"
+      - build:
+          otp-version: 26.2.5.4
+          context: mongooseim-org
+          requires:
+            - compile-amd64
+            - compile-arm64
   ubuntu-jammy:
     jobs:
       - compile:
@@ -105,6 +120,21 @@ workflows:
           resource-class: "arm.medium"
       - build:
           base-image: "ubuntu:jammy"
+          context: mongooseim-org
+          requires:
+            - compile-amd64
+            - compile-arm64
+  rockylinux-8:
+    jobs:
+      - compile:
+          name: compile-amd64
+          base-image: "rockylinux:8"
+      - compile:
+          name: compile-arm64
+          base-image: "rockylinux:8"
+          resource-class: "arm.medium"
+      - build:
+          base-image: "rockylinux:8"
           context: mongooseim-org
           requires:
             - compile-amd64
