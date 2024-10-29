@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-export OTP_VERSION=${1:-25.3}
+source tools/utils.sh
 
 ./compile.sh
-docker build --build-arg BASE_VERSION --build-arg OTP_VERSION \
-  -t cimg-erlang:$OTP_VERSION .
+
+set_up_build
+
+docker build --build-arg BASE_IMAGE --build-arg OTP_VERSION --build-arg USER \
+    -t cimg-erlang:$IMAGE_TAG .
