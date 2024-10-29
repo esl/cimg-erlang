@@ -7,7 +7,33 @@ parameters:
     default: "current"
   otp-version:
     type: string
-    default: "27.0"
+    default: "27.1.2"
+
+references:
+  - &job
+    parameters:
+      base-image:
+        type: string
+        default: "cimg/base:<<pipeline.parameters.base-version>>"
+      otp-version:
+        type: string
+        default: <<pipeline.parameters.otp-version>>
+      resource-class:
+        type: string
+        default: "medium"
+    machine:
+      image: ubuntu-2204:current
+    resource_class: <<parameters.resource-class>>
+  - &compile-amd64
+    name: compile-amd64
+  - &compile-arm64
+    name: compile-arm64
+    resource-class: "arm.medium"
+  - &build
+    context: mongooseim-org
+    requires:
+      - compile-amd64
+      - compile-arm64
 
 commands:
   update_docker:
@@ -17,37 +43,24 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get --only-upgrade install docker-ce docker-ce-cli containerd.io
+
+jobs:
   compile:
+    <<: *job
     steps:
+      - update_docker
       - checkout
       - run:
           name: Compile Erlang/OTP
           command: |
-            BASE_VERSION=<<pipeline.parameters.base-version>> \
-            OTP_VERSION=<<pipeline.parameters.otp-version>> ./compile.sh
+            BASE_IMAGE=<<parameters.base-image>> \
+            OTP_VERSION=<<parameters.otp-version>> \
+            PROGRESS=plain ./compile.sh
       - persist_to_workspace:
           root: ~/project/
           paths: ["builds"]
-
-jobs:
-  compile-amd64:
-    machine:
-      image: ubuntu-2204:current
-    resource_class: medium
-    steps:
-      - update_docker
-      - compile
-  compile-arm64:
-    machine:
-      image: ubuntu-2204:current
-    resource_class: arm.medium
-    steps:
-      - update_docker
-      - compile
   build:
-    machine:
-      image: ubuntu-2204:current
-    resource_class: medium
+    <<: *job
     steps:
       - update_docker
       - checkout
@@ -64,16 +77,133 @@ jobs:
       - run:
           name: Build multi-platform docker image
           command: |
-            BASE_VERSION=<<pipeline.parameters.base-version>> \
-            OTP_VERSION=<<pipeline.parameters.otp-version>> ./circleci-build.sh
+            BASE_IMAGE=<<parameters.base-image>> \
+            OTP_VERSION=<<parameters.otp-version>> ./circleci-build.sh
 
 workflows:
-  main:
+  cimg:
     jobs:
-      - compile-amd64
-      - compile-arm64
+      - compile: *compile-amd64
+      - compile: *compile-arm64
+      - build: *build
+  debian-bookworm:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "debian:bookworm"
+      - compile:
+          <<: *compile-arm64
+          base-image: "debian:bookworm"
       - build:
-          context: mongooseim-org
-          requires:
-            - compile-amd64
-            - compile-arm64
+          <<: *build
+          base-image: "debian:bookworm"
+  debian-bullseye:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "debian:bullseye"
+      - compile:
+          <<: *compile-arm64
+          base-image: "debian:bullseye"
+      - build:
+          <<: *build
+          base-image: "debian:bullseye"
+  debian-buster:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "debian:buster"
+      - compile:
+          <<: *compile-arm64
+          base-image: "debian:buster"
+      - build:
+          <<: *build
+          base-image: "debian:buster"
+  ubuntu-oracular:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "ubuntu:oracular"
+      - compile:
+          <<: *compile-arm64
+          base-image: "ubuntu:oracular"
+      - build:
+          <<: *build
+          base-image: "ubuntu:oracular"
+  ubuntu-noble:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "ubuntu:noble"
+      - compile:
+          <<: *compile-arm64
+          base-image: "ubuntu:noble"
+      - build:
+          <<: *build
+          base-image: "ubuntu:noble"
+  ubuntu-jammy:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "ubuntu:jammy"
+      - compile:
+          <<: *compile-arm64
+          base-image: "ubuntu:jammy"
+      - build:
+          <<: *build
+          base-image: "ubuntu:jammy"
+  ubuntu-focal:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "ubuntu:focal"
+      - compile:
+          <<: *compile-arm64
+          base-image: "ubuntu:focal"
+      - build:
+          <<: *build
+          base-image: "ubuntu:focal"
+  rockylinux-9:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "rockylinux:9"
+      - compile:
+          <<: *compile-arm64
+          base-image: "rockylinux:9"
+      - build:
+          <<: *build
+          base-image: "rockylinux:9"
+  rockylinux-8:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "rockylinux:8"
+      - compile:
+          <<: *compile-arm64
+          base-image: "rockylinux:8"
+      - build:
+          <<: *build
+          base-image: "rockylinux:8"
+  almalinux-9:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "almalinux:9"
+      - compile:
+          <<: *compile-arm64
+          base-image: "almalinux:9"
+      - build:
+          <<: *build
+          base-image: "almalinux:9"
+  almalinux-8:
+    jobs:
+      - compile:
+          <<: *compile-amd64
+          base-image: "almalinux:8"
+      - compile:
+          <<: *compile-arm64
+          base-image: "almalinux:8"
+      - build:
+          <<: *build
+          base-image: "almalinux:8"
