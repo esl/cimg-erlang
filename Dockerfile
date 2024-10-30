@@ -20,4 +20,7 @@ RUN --mount=type=bind,src=builds,dst=/builds \
     cd && \
     rm -rf /erlang-src
 
+RUN --mount=type=bind,src=tools,dst=/tools \
+    /tools/smoke_test.sh
+
 USER $USER
