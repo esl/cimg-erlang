@@ -19,7 +19,7 @@ needs_compiled_openssl() {
     OS_VERSION=$(grep ^VERSION_ID= /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)
 
     if { [ "$OS_ID" = "ubuntu" ] && [ "$OS_VERSION" -lt 22 ]; } || \
-       { [ "$OS_ID" = "debian" ] && [ "$OS_VERSION" -lt 11 ]; } || \
+       { [ "$OS_ID" = "debian" ] && [ "$OS_VERSION" -lt 12 ]; } || \
        { [ "$OS_ID" = "rocky" ] && [ "$OS_VERSION" -lt 9 ]; } || \
        { [ "$OS_ID" = "almalinux" ] && [ "$OS_VERSION" -lt 9 ]; }; then
         return 0
