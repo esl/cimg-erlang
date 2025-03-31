@@ -20,9 +20,10 @@ You can also clone the [esl/cimg-erlang](https://github.com/esl/cimg-erlang) rep
 ```bash
 $ OTP_VERSION=27.1.2 BASE_IMAGE=ubuntu:jammy ./build.sh
 ```
+Optionally, you can set the `OPENSSL_VERSION` argument (e.g., `3.0.16`) to choose which OpenSSL version should be compiled for use on older systems.
+This version is used specifically by Erlang and may differ from the system-wide OpenSSL version.
 
 Note that only selected Linux distributions are supported (see [`tools/prepare.sh`](https://github.com/esl/cimg-erlang/blob/master/tools/prepare.sh)).
-Optionally, you can set the `OPENSSL_VERSION` argument (e.g., `3.0.16`) to choose which OpenSSL version should be compiled for use on older systems.
 
 ## Trigger build using "Trigger pipeline" on CircleCI
 

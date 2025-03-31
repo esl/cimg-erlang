@@ -14,8 +14,10 @@ compile() {
         tar -xzf openssl.tar.gz --strip-components=1
 
         ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
-        make -j"$(nproc)"
-        make install
+        make build_libs -j"$(nproc)"
+        make install_sw
+
+        rm -rf /usr/local/ssl/bin/
 
         mkdir -p /builds
         tar -czf /builds/openssl-${TARGETARCH}.tar.gz -C /usr/local/ssl .
