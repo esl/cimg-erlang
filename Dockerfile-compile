@@ -5,19 +5,15 @@ ARG BASE_IMAGE
 ARG OTP_VERSION
 ARG TARGETARCH
 ARG SETUP
+ARG OPENSSL_VERSION
 
 USER root
 
 RUN --mount=type=bind,src=tools,dst=/tools \
     /tools/prepare.sh compile
 
-RUN ERLANG_DOWNLOAD_URL="https://github.com/erlang/otp/releases/download/OTP-$OTP_VERSION/otp_src_$OTP_VERSION.tar.gz" && \
-    mkdir /erlang-src && \
-    cd /erlang-src && \
-    curl -fSL -o erlang.tar.gz $ERLANG_DOWNLOAD_URL && \
-    tar -xz --strip-components=1 -f erlang.tar.gz && \
-    ./configure && \
-    make
+RUN --mount=type=bind,src=tools,dst=/tools \
+    /tools/openssl_setup.sh compile
 
-RUN mkdir /builds && \
-    tar -czf /builds/erlang-$TARGETARCH.tar.gz /erlang-src
+RUN --mount=type=bind,src=tools,dst=/tools \
+    /tools/erlang_setup.sh compile

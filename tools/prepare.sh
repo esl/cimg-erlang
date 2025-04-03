@@ -2,19 +2,29 @@
 
 set -euo pipefail
 
+source /tools/utils.sh
+
 prepare() {
-    EXTRA_PACKAGES=${1:-}
+    MODE=$1
+    EXTRA_PACKAGES=${2:-}
     case $BASE_IMAGE in
         ubuntu:* | debian:* | cimg/base:*)
             apt-get update
             apt-get install -y --no-install-recommends \
                 libncurses5-dev unixodbc-dev make gcc g++ curl ca-certificates libssl-dev \
                 $EXTRA_PACKAGES
+            if [ "$MODE" = "compile" ] && needs_compiled_openssl; then
+                apt-get install -y --no-install-recommends build-essential zlib1g-dev
+            fi
             ;;
         rockylinux:8 | almalinux:8)
             dnf update -y
             dnf install -y unixODBC-devel make gcc gcc-c++ openssl openssl-devel ncurses-devel \
                 $EXTRA_PACKAGES
+            if [ "$MODE" = "compile" ] && needs_compiled_openssl; then
+                dnf install -y zlib-devel
+                dnf groupinstall -y "Development Tools"
+            fi
             ;;
         rockylinux:9 | almalinux:9)
             dnf update -y
@@ -32,10 +42,10 @@ prepare() {
 
 case ${1:-} in
     "compile")
-        prepare "perl"
+        prepare "compile" "perl"
         ;;
     "build")
-        prepare
+        prepare "build"
         ;;
     "")
         echo "Missing command"
