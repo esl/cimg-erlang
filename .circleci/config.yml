@@ -7,7 +7,7 @@ parameters:
     default: "current"
   otp-version:
     type: string
-    default: "27.1.2"
+    default: "27.3.4"
 
 references:
   - &job
