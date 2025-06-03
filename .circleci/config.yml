@@ -119,17 +119,17 @@ workflows:
       - build:
           <<: *build
           base-image: "debian:buster"
-  ubuntu-oracular:
+  ubuntu-plucky:
     jobs:
       - compile:
           <<: *compile-amd64
-          base-image: "ubuntu:oracular"
+          base-image: "ubuntu:plucky"
       - compile:
           <<: *compile-arm64
-          base-image: "ubuntu:oracular"
+          base-image: "ubuntu:plucky"
       - build:
           <<: *build
-          base-image: "ubuntu:oracular"
+          base-image: "ubuntu:plucky"
   ubuntu-noble:
     jobs:
       - compile:
