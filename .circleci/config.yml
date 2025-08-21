@@ -7,7 +7,7 @@ parameters:
     default: "current"
   otp-version:
     type: string
-    default: "27.3.4"
+    default: "28.0.2"
 
 references:
   - &job
@@ -108,17 +108,17 @@ workflows:
       - build:
           <<: *build
           base-image: "debian:bullseye"
-  debian-buster:
+  debian-trixie:
     jobs:
       - compile:
           <<: *compile-amd64
-          base-image: "debian:buster"
+          base-image: "debian:trixie"
       - compile:
           <<: *compile-arm64
-          base-image: "debian:buster"
+          base-image: "debian:trixie"
       - build:
           <<: *build
-          base-image: "debian:buster"
+          base-image: "debian:trixie"
   ubuntu-plucky:
     jobs:
       - compile:
